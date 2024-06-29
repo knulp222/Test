@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ballon Mystérieux</title>
+<style>
+body{margin:0;overflow:hidden;display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a2e;font-family:Arial;color:#fff}
+#g{position:relative}
+#c{border:2px solid #4a4e69}
+#s{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(26,26,46,.9);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+#b{font-size:24px;padding:10px 20px;margin-top:20px;background:#e94560;border:none;color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="g">
+<canvas id="c" width="400" height="600"></canvas>
+<div id="s"><h1>Ballon Mystérieux</h1><p>Évite les stalactites !</p><button id="b">Jouer</button></div>
+</div>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d'),s=document.getElementById('s'),p=document.getElementById('b');
+let X=200,Y=300,r=40,h=80,vx=0,vy=0,g=.01,a=.99,S=0,H=0,G=0,N=[],E=['😊','😨'],e=0,P=[],L=100,T=10,Q=[],C=0,V=1,B=['#16213e','#1b3a4b','#006466','#144552'];
+function I(){N=[];Q=Array(T+1).fill().map((_,i)=>({x:X,y:Y+r+i*L/T,vx:0,vy:0}))}
+function A(){
+let s=Math.floor(Math.random()*4),n={w:25+Math.random()*25,l:50+Math.random()*70};
+switch(s){
+case 0:n.x=0;n.y=Math.random()*600;n.ex=n.x+n.l;n.ey=n.y;break;
+case 1:n.x=400;n.y=Math.random()*600;n.ex=n.x-n.l;n.ey=n.y;break;
+case 2:n.x=Math.random()*400;n.y=0;n.ex=n.x;n.ey=n.y+n.l;break;
+case 3:n.x=Math.random()*400;n.y=600;n.ex=n.x;n.ey=n.y-n.l;break;
+}
+N.push(n);
+}
+function U(){
+if(!G)return;
+x.fillStyle=B[V-1];x.fillRect(0,0,400,600);
+if(!e){
+vy+=g;vx*=a;vy*=a;X+=vx;Y+=vy;
+if(X-r<0||X+r>400){vx*=-.8;X=Math.max(r,Math.min(400-r,X))}
+if(Y-r<0){vy*=-.8;Y=r}
+if(Y+r>600){if(S>H)H=S;alert('Game Over! Score: '+S+'\nMeilleur: '+H);S=0;X=200;Y=300;vx=0;vy=0;V=1;C=0;I();for(let i=0;i<3;i++)A()}
+if(N.some(n=>{
+let dx=n.ex-n.x,dy=n.ey-n.y,t=((X-n.x)*dx+(Y-n.y)*dy)/(dx*dx+dy*dy);
+t=Math.max(0,Math.min(1,t));
+let px=n.x+t*dx,py=n.y+t*dy,d=Math.hypot(X-px,Y-py);
+return d<r+10*(1-t);
+})){
+e=1;P=Array(50).fill().map(()=>({x:X,y:Y,vx:(Math.random()-.5)*10,vy:(Math.random()-.5)*10,r:Math.random()*5+2,c:`hsl(${Math.random()*60+340},100%,50%)`}));
+setTimeout(()=>{e=0;X=200;Y=300;vx=0;vy=-5;I();for(let i=0;i<3;i++)A()},1000)
+}
+Q[0]={x:X,y:Y+r,vx:0,vy:0};
+for(let i=1;i<=T;i++){
+let d=Q[i].x-Q[i-1].x,f=Q[i].y-Q[i-1].y,t=Math.sqrt(d*d+f*f),j=(L/T)/t;
+Q[i].x=Q[i-1].x+d*j;Q[i].y=Q[i-1].y+f*j;
+Q[i].vy+=g*.5;Q[i].vx*=a;Q[i].vy*=a;Q[i].x+=Q[i].vx;Q[i].y+=Q[i].vy
+}
+}
+if(e)P.forEach(p=>{x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fillStyle=p.c;x.fill();p.x+=p.vx;p.y+=p.vy;p.vy+=.2});
+else{
+x.beginPath();x.arc(X,Y,r,0,7);x.fillStyle='#e94560';x.fill();
+x.beginPath();x.arc(X-r*.3,Y-r*.3,r*.2,0,7);x.fillStyle='rgba(255,255,255,.3)';x.fill();
+x.font=r+'px Arial';x.fillStyle='black';x.textAlign='center';x.textBaseline='middle';
+x.fillText(N.some(n=>Math.hypot(X-n.x,Y-n.y)<100||Math.hypot(X-n.ex,Y-n.ey)<100)?E[1]:E[0],X,Y);
+x.beginPath();x.arc(X,Y,h,0,7);x.strokeStyle='rgba(255,255,255,.1)';x.stroke();
+x.beginPath();x.moveTo(Q[0].x,Q[0].y);Q.forEach(q=>x.lineTo(q.x,q.y));x.strokeStyle='#fff';x.lineWidth=2;x.stroke()
+}
+N.forEach(n=>{
+let g=x.createLinearGradient(n.x,n.y,n.ex,n.ey);
+g.addColorStop(0,'#a0e0ff');
+g.addColorStop(1,'#2080ff');
+x.fillStyle=g;
+x.beginPath();
+x.moveTo(n.x,n.y);
+x.lineTo(n.ex,n.ey);
+x.lineTo(n.x-(n.x==n.ex?n.w:0),n.y-(n.y==n.ey?n.w:0));
+x.fill();
+});
+x.fillStyle='#fff';x.font='20px Arial';x.fillText('Score: '+S+' Meilleur: '+H+' Niveau: '+V,200,30);
+requestAnimationFrame(U)
+}
+c.addEventListener('mousemove',t=>{
+if(!G||e)return;
+const m=c.getBoundingClientRect(),d=Math.hypot(t.clientX-m.left-X,t.clientY-m.top-Y);
+if(d<h){
+const n=Math.atan2(t.clientY-m.top-Y,t.clientX-m.left-X),f=(h-d)/h*5;
+vx-=Math.cos(n)*f;vy-=Math.sin(n)*f;vx+=(Math.random()-.5)*2;vy+=(Math.random()-.5)*2;S++;C++;
+if(C==10){V++;C=0;A()}
+}else C=0
+});
+p.addEventListener('click',()=>{G=1;s.style.display='none';I();for(let i=0;i<3;i++)A();U()});
+</script>
+</body>
+</html>
