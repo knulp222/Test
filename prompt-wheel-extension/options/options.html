@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Prompt Wheel — réglages</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="page-head">
+      <div class="brand">
+        <img src="../icons/icon48.png" alt="" width="34" height="34">
+        <div>
+          <h1>Prompt Wheel</h1>
+          <p class="muted">Gère ta bibliothèque de prompts et le comportement de la roue.</p>
+        </div>
+      </div>
+      <div class="head-actions">
+        <button id="export" class="btn btn-ghost">Exporter</button>
+        <button id="import" class="btn btn-ghost">Importer</button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden>
+        <button id="reset" class="btn btn-ghost btn-danger">Réinitialiser</button>
+      </div>
+    </header>
+
+    <div id="welcome" class="welcome" hidden>
+      <strong>Bienvenue !</strong>
+      <p>Ouvre la roue sur n'importe quelle page avec <kbd id="welcome-shortcut">Alt+Shift+P</kbd> (ou <kbd>Alt</kbd>+<kbd>Q</kbd>).
+      Choisis un secteur : le prompt est inséré dans le champ de saisie et copié dans le presse-papiers.</p>
+    </div>
+
+    <section class="card">
+      <h2>Réglages</h2>
+      <div class="settings-grid">
+        <label class="field">
+          <span>Ouverture de la roue</span>
+          <select id="openAt">
+            <option value="cursor">À la position du curseur</option>
+            <option value="center">Au centre de l'écran</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Raccourci dans la page</span>
+          <button id="hotkey" class="hotkey-btn" type="button">…</button>
+          <small class="muted">Clique puis appuie sur la combinaison. Le raccourci Chrome se règle sur <a href="#" id="shortcuts-link">chrome://extensions/shortcuts</a>.</small>
+        </label>
+
+        <label class="check"><input type="checkbox" id="hotkeyEnabled"> <span>Activer le raccourci dans la page</span></label>
+        <label class="check"><input type="checkbox" id="alwaysCopy"> <span>Copier aussi dans le presse-papiers quand l'insertion réussit</span></label>
+        <label class="check"><input type="checkbox" id="autoSend"> <span>Envoyer automatiquement après insertion (touche Entrée)</span></label>
+        <label class="check"><input type="checkbox" id="showRecents"> <span>Afficher la catégorie « Récents » dans la roue</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Bibliothèque</h2>
+        <button id="add-category" class="btn">+ Catégorie</button>
+      </div>
+      <p class="muted small">Utilise <code>{{nom}}</code> dans un prompt : la roue demandera la valeur avant l'insertion.</p>
+      <div id="categories"></div>
+    </section>
+
+    <p class="muted small footer-note">Les modifications sont enregistrées automatiquement et synchronisées avec ton compte Chrome.</p>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="../src/defaults.js"></script>
+  <script src="../src/store.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
