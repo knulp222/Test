@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
-# Produit un .zip distribuable de l'extension.
+# Produit le .zip distribuable et rafraîchit le fichier proposé sur le site.
+# Le zip contient un dossier « prompt-wheel/ » : une fois décompressé, c'est
+# ce dossier qu'on désigne dans « Charger l'extension non empaquetée ».
 set -euo pipefail
 cd "$(dirname "$0")"
 
 version=$(grep -m1 '"version"' manifest.json | sed 's/.*: *"\(.*\)".*/\1/')
 out="prompt-wheel-${version}.zip"
-rm -f "$out"
+stage=$(mktemp -d)
+trap 'rm -rf "$stage"' EXIT
 
-zip -r -q "$out" \
-  manifest.json src popup options icons README.md \
-  -x '*.DS_Store' '*/.*'
+mkdir -p "$stage/prompt-wheel"
+cp -R manifest.json src popup options icons README.md "$stage/prompt-wheel/"
+find "$stage" -name '.DS_Store' -delete
+
+rm -f "$out"
+(cd "$stage" && zip -r -q "$OLDPWD/$out" prompt-wheel)
 
 echo "Créé : $out ($(du -h "$out" | cut -f1))"
+
+# Le site sert toujours le même nom de fichier, pour que le lien ne bouge pas.
+if [ -d ../prompt-wheel ]; then
+  cp "$out" ../prompt-wheel/prompt-wheel.zip
+  echo "Copié  : ../prompt-wheel/prompt-wheel.zip"
+  echo "Pensez à mettre à jour le numéro de version affiché sur la page."
+fi

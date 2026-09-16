@@ -8,13 +8,16 @@ Aucun exécutable à installer : un dossier à charger dans Chrome.
 
 ## Installation (pour les stagiaires)
 
-1. Télécharger le `.zip` et le décompresser (ou récupérer le dossier `prompt-wheel-extension`).
-2. Ouvrir Chrome sur `chrome://extensions`.
+Page de présentation et téléchargement : **https://knulp222.github.io/Test/prompt-wheel/**
+
+1. Télécharger le `.zip` et le décompresser : il contient un dossier `prompt-wheel`.
+2. Ouvrir Chrome sur `chrome://extensions` (Edge : `edge://extensions`).
 3. Activer **Mode développeur** (en haut à droite).
-4. **Charger l'extension non empaquetée** → choisir le dossier.
+4. **Charger l'extension non empaquetée** → choisir le dossier `prompt-wheel`.
 5. La page de réglages s'ouvre. C'est prêt.
 
 > Recharger les onglets déjà ouverts : la roue n'y est pas encore active.
+> Ne pas supprimer le dossier décompressé : Chrome le relit à chaque démarrage.
 
 ## Utilisation
 
@@ -109,11 +112,29 @@ Le format est **celui du `prompts.json` de la version Python** (`sets` → `cate
 Pour livrer la bibliothèque déjà pré-remplie, remplacer les fichiers `src/sets/*.js`
 avant de distribuer le dossier — c'est ce qui est chargé à la première installation.
 
-## Empaqueter
+## Empaqueter et diffuser
 
 ```bash
 ./package.sh          # produit prompt-wheel-<version>.zip
+                      # et met à jour ../prompt-wheel/prompt-wheel.zip (le fichier servi par le site)
 ```
+
+Le zip contient un dossier `prompt-wheel/` : c'est ce dossier-là qu'on désigne dans
+« Charger l'extension non empaquetée ».
+
+Trois façons de diffuser :
+
+| Moyen | Ce que ça demande | Ce que vit l'utilisateur |
+| --- | --- | --- |
+| **ZIP + mode développeur** (actuel) | rien | décompresser, activer le mode développeur, charger le dossier |
+| **Chrome Web Store** | un compte développeur Chrome (frais d'inscription uniques), une fiche à remplir, une relecture de Google à chaque version | installation en un clic, mises à jour automatiques |
+| **Stratégie d'entreprise** | un parc géré : l'administrateur déclare l'extension (`ExtensionInstallForcelist` / `ExtensionSettings`) | l'extension arrive seule sur les postes |
+
+Un fichier **`.crx`** ne simplifie rien : sur Windows et macOS, Chrome refuse un `.crx`
+qui ne vient pas du Web Store (glisser-déposer bloqué, extension désactivée au
+redémarrage), sauf déploiement par stratégie d'entreprise. Empaqueter ne dispense
+donc pas du mode développeur — seul le Web Store le fait. Les conditions exactes du
+Web Store changent régulièrement : les vérifier avant de se lancer.
 
 ## Structure
 

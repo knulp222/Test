@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Wheel — la roue des prompts</title>
+<meta name="description" content="Un menu radial pour retrouver vos prompts et les insérer dans n'importe quel champ de saisie. Extension Chrome gratuite, 140 prompts fournis, entièrement modifiables.">
+<meta name="color-scheme" content="light">
+<link rel="icon" type="image/png" href="icon.png">
+<meta property="og:title" content="Prompt Wheel — la roue des prompts">
+<meta property="og:description" content="Vos prompts à portée de geste, dans n'importe quel champ de saisie. Extension Chrome gratuite.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14161a;
+    --dim: #5f6570;
+    --line: #e6e6e1;
+    --paper: #fbfbf9;
+    --card: #ffffff;
+    --accent: #4a5bf0;
+    --accent-soft: #eceefe;
+    --radius: 14px;
+    --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { width: 100%; max-width: 1020px; margin: 0 auto; padding: 0 24px; }
+
+  a { color: inherit; }
+
+  /* ---------- en-tête ---------- */
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 26px 0 0;
+  }
+  .mark { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; }
+  .mark img { width: 26px; height: 26px; border-radius: 7px; }
+  .nav { display: flex; align-items: center; gap: 24px; font-size: 15px; color: var(--dim); }
+  .nav a { text-decoration: none; }
+  .nav a:hover { color: var(--ink); }
+
+  /* ---------- hero ---------- */
+
+  .hero { padding: 86px 0 0; max-width: 720px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(38px, 6vw, 60px);
+    line-height: 1.04;
+    letter-spacing: -.035em;
+    font-weight: 600;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lead {
+    margin: 22px 0 0;
+    font-size: clamp(17px, 2.2vw, 20px);
+    color: var(--dim);
+    max-width: 30em;
+  }
+
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 34px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 22px;
+    border-radius: 11px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #2b2f38; transform: translateY(-1px); }
+  .btn-ghost { border-color: var(--line); background: var(--card); }
+  .btn-ghost:hover { border-color: #cfcfc8; }
+  .meta { margin-top: 16px; font-size: 14.5px; color: var(--dim); }
+
+  /* ---------- maquette ---------- */
+
+  .shot { position: relative; margin: 64px 0 0; }
+  .shot::before {
+    content: "";
+    position: absolute;
+    inset: -40px 0 30px;
+    background: radial-gradient(75% 65% at 50% 40%, rgba(74, 91, 240, .08), transparent 72%);
+    pointer-events: none;
+  }
+  .stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    gap: 18px;
+    padding: 16px;
+    background: #dfe4ec;
+    border-radius: 18px;
+    box-shadow: 0 30px 60px -30px rgba(15, 20, 30, .35), 0 2px 6px rgba(15, 20, 30, .06);
+  }
+  .stage-search {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 13px;
+    background: #fff;
+    border: 1px solid #e3e7ee;
+    border-radius: 9px;
+    font-size: 14px;
+    color: #9aa1ad;
+  }
+  .stage-search span:last-child { font-size: 12.5px; color: #8b93a1; }
+  .wheel { width: 100%; height: auto; display: block; }
+  .sec-icon { font-size: 21px; }
+  .sec-label { font-size: 13.5px; font-weight: 600; fill: #1f2430; }
+  .hub-title { font-size: 14px; font-weight: 600; fill: #1f2430; }
+  .hub-sub { font-size: 11.5px; fill: #6b7280; }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px 18px;
+    min-width: 0;
+  }
+  .panel-title { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .panel-body { font-size: 13.5px; line-height: 1.62; color: #6b7280; margin: 0; }
+  .panel-foot {
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 12px;
+    color: #8b93a1;
+    border-top: 1px solid #eef0f4;
+  }
+
+  /* ---------- sections ---------- */
+
+  section { padding: 96px 0 0; }
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h2 {
+    margin: 0 0 12px;
+    font-size: clamp(26px, 3.6vw, 34px);
+    line-height: 1.15;
+    letter-spacing: -.025em;
+    font-weight: 600;
+  }
+  .section-lead { margin: 0; color: var(--dim); max-width: 34em; }
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 44px;
+  }
+  .col h3 {
+    margin: 0 0 8px;
+    font-size: 17.5px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .col p { margin: 0; font-size: 15.5px; color: var(--dim); }
+
+  /* ---------- gestes ---------- */
+
+  .gestures { margin-top: 40px; border-top: 1px solid var(--line); }
+  .gesture {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 13px 2px;
+    border-bottom: 1px solid var(--line);
+    font-size: 15.5px;
+  }
+  .gesture dt { flex: 0 0 190px; font-weight: 500; }
+  .gesture dd { margin: 0; color: var(--dim); }
+  kbd {
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  /* ---------- installation ---------- */
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    margin-top: 44px;
+    counter-reset: step;
+  }
+  .step {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .step::before {
+    counter-increment: step;
+    content: counter(step);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .step p { margin: 0; font-size: 15px; line-height: 1.55; }
+  .step .sub { margin-top: 8px; font-size: 13.5px; color: var(--dim); }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13.5px;
+    white-space: nowrap;
+    background: #f2f2ee;
+    border-radius: 5px;
+    padding: 1px 6px;
+  }
+
+  .note {
+    margin-top: 30px;
+    padding: 20px 22px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 15.5px;
+    color: var(--dim);
+  }
+  .note strong { color: var(--ink); font-weight: 600; }
+
+  .closing { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+  /* ---------- pied ---------- */
+
+  footer {
+    margin-top: 110px;
+    padding: 30px 0 44px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 26px;
+    justify-content: space-between;
+    font-size: 14.5px;
+    color: var(--dim);
+  }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--ink); text-decoration: underline; }
+
+  /* ---------- écrans étroits ---------- */
+
+  @media (max-width: 880px) {
+    .cols, .steps { grid-template-columns: repeat(2, 1fr); }
+    .hero { padding-top: 60px; }
+    section { padding-top: 76px; }
+  }
+  @media (max-width: 660px) {
+    body { font-size: 16px; }
+    .wrap { padding: 0 18px; }
+    .nav a.hide-sm { display: none; }
+    .stage { grid-template-columns: 1fr; }
+    .stage-search span:last-child { display: none; }
+    .panel { display: none; }
+    .cols, .steps { grid-template-columns: 1fr; gap: 24px; }
+    .gesture { flex-direction: column; gap: 4px; }
+    .gesture dt { flex: none; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="mark"><img src="icon.png" alt="">Prompt Wheel</div>
+    <nav class="nav">
+      <a href="#installation" class="hide-sm">Installation</a>
+      <a href="https://github.com/knulp222/Test/tree/main/prompt-wheel-extension">Code source</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <div class="hero">
+      <h1>Vos prompts,<br>à portée de <em>geste</em>.</h1>
+      <p class="lead">Une roue s'ouvre par-dessus la page. Vous choisissez un prompt, il part
+        directement dans le champ de saisie — ChatGPT, Claude, Gemini, un mail, un formulaire.
+        140 prompts sont fournis, et tout est modifiable.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="prompt-wheel.zip" download>
+          Télécharger l'extension
+        </a>
+        <a class="btn btn-ghost" href="#installation">Comment l'installer</a>
+      </div>
+      <p class="meta">Version 1.0.0 · Chrome et Edge · gratuit · rien à installer sur l'ordinateur</p>
+    </div>
+
+    <div class="shot">
+      <div class="stage">
+        <div class="stage-search">
+          <span>Rechercher un prompt…</span>
+          <span>Tab : jeu suivant (1/4)</span>
+        </div>
+        <svg class="wheel" viewBox="0 0 460 460" role="img" aria-label="La roue ouverte sur le jeu « Mécanique &amp; biais », avec sept secteurs : Mécanique, Transformer, Étages, Images &amp; biais, Vigilance, Sécurité, Construire.">
+          <g class="sec">
+            <path d="M 238.6 24.2 A 206 206 0 0 1 385.5 94.9 L 293.4 174.9 A 84 84 0 0 0 233.5 146.1 Z" fill="#ebedff"/>
+            <path d="M 238.6 25.7 A 204.5 204.5 0 0 1 384.4 95.9" fill="none" stroke="#5B6CFF" stroke-width="3" stroke-linecap="round"/>
+            <text class="sec-icon" x="294.2" y="76.7" text-anchor="middle">⚙️</text>
+            <text class="sec-label" x="294.2" y="102.7" text-anchor="middle">Mécanique</text>
+          </g>
+          <g class="sec">
+            <path d="M 396.3 108.4 A 206 206 0 0 1 432.6 267.4 L 312.6 245.2 A 84 84 0 0 0 297.8 180.4 Z" fill="#e0f6fa"/>
+            <path d="M 395.1 109.3 A 204.5 204.5 0 0 1 431.1 267.1" fill="none" stroke="#00B4D8" stroke-width="3" stroke-linecap="round"/>
+            <text class="sec-icon" x="374.3" y="177.1" text-anchor="middle">🔄</text>
+            <text class="sec-label" x="374.3" y="203.1" text-anchor="middle">Transformer</text>
+          </g>
+          <g class="sec">
+            <path d="M 428.7 284.2 A 206 206 0 0 1 327.1 411.7 L 269.6 304.1 A 84 84 0 0 0 311 252.1 Z" fill="#fef4ec"/>
+            <path d="M 427.3 283.8 A 204.5 204.5 0 0 1 326.4 410.4" fill="none" stroke="#F4A261" stroke-width="3" stroke-linecap="round"/>
+            <text class="sec-icon" x="345.7" y="302.3" text-anchor="middle">🪜</text>
+            <text class="sec-label" x="345.7" y="328.3" text-anchor="middle">Étages</text>
+          </g>
+          <g class="sec">
+            <path d="M 311.5 419.2 A 206 206 0 0 1 148.5 419.2 L 196.8 307.1 A 84 84 0 0 0 263.2 307.1 Z" fill="#e5f3f2"/>
+            <path d="M 310.9 417.8 A 204.5 204.5 0 0 1 149.1 417.8" fill="none" stroke="#2A9D8F" stroke-width="3" stroke-linecap="round"/>
+            <text class="sec-icon" x="230" y="358" text-anchor="middle">🪞</text>
+            <text class="sec-label" x="230" y="384" text-anchor="middle">Images &amp; biais</text>
+          </g>
+          <g class="sec">
+            <path d="M 132.9 411.7 A 206 206 0 0 1 31.3 284.2 L 149 252.1 A 84 84 0 0 0 190.4 304.1 Z" fill="#fce7e9"/>
+            <path d="M 133.6 410.4 A 204.5 204.5 0 0 1 32.7 283.8" fill="none" stroke="#E63946" stroke-width="3" stroke-linecap="round"/>
+            <text class="sec-icon" x="114.3" y="302.3" text-anchor="middle">🚨</text>
+            <text class="sec-label" x="114.3" y="328.3" text-anchor="middle">Vigilance</text>
+          </g>
+          <g class="sec">
+            <path d="M 27.4 267.4 A 206 206 0 0 1 63.7 108.4 L 162.2 180.4 A 84 84 0 0 0 147.4 245.2 Z" fill="#e8e8eb"/>
+            <path d="M 28.9 267.1 A 204.5 204.5 0 0 1 64.9 109.3" fill="none" stroke="#3D405B" stroke-width="3" stroke-linecap="round"/>
+            <text class="sec-icon" x="85.7" y="177.1" text-anchor="middle">🔒</text>
+            <text class="sec-label" x="85.7" y="203.1" text-anchor="middle">Sécurité</text>
+          </g>
+          <g class="sec is-hot">
+            <path d="M 74.5 94.9 A 206 206 0 0 1 221.4 24.2 L 226.5 146.1 A 84 84 0 0 0 166.6 174.9 Z" fill="#cbb6fb"/>
+            <path d="M 75.6 95.9 A 204.5 204.5 0 0 1 221.4 25.7" fill="none" stroke="#8B5CF6" stroke-width="3" stroke-linecap="round"/>
+            <text class="sec-icon" x="165.8" y="76.7" text-anchor="middle">🧩</text>
+            <text class="sec-label" x="165.8" y="102.7" text-anchor="middle">Construire</text>
+          </g>
+          <g class="hub">
+            <circle cx="230" cy="230" r="74" fill="#ffffff"/>
+            <text class="hub-title" x="230" y="228" text-anchor="middle">Mécanique</text>
+            <text class="hub-title" x="230" y="246" text-anchor="middle">&amp; biais</text>
+            <text class="hub-sub" x="230" y="268" text-anchor="middle">1/4 · clic : autre jeu</text>
+          </g>
+        </svg>
+        <div class="panel">
+          <div class="panel-title">Construire</div>
+          <p class="panel-body">Assemble un prompt brique par brique : rôle, tâche, public, ton,
+            format, garde-fous.</p>
+          <div class="panel-foot">Clic : insérer · Maj + clic : insérer et envoyer · Ctrl + clic : copier</div>
+        </div>
+      </div>
+    </div>
+
+    <section id="outil">
+      <p class="eyebrow">L'outil</p>
+      <h2>Une bibliothèque de prompts qui vous appartient.</h2>
+      <p class="section-lead">Les prompts fournis sont un point de départ, pas un catalogue figé.
+        Tout se renomme, se réorganise et se remplace depuis la page de réglages.</p>
+
+      <div class="cols">
+        <div class="col">
+          <h3>Entièrement personnalisable</h3>
+          <p>Ajoutez vos prompts, choisissez l'emoji et la couleur de chaque secteur, réorganisez
+            les jeux. Un export JSON permet de diffuser la même bibliothèque à toute une équipe.</p>
+        </div>
+        <div class="col">
+          <h3>Simple à utiliser</h3>
+          <p>Un raccourci, un clic. Le prompt est inséré dans le champ actif <em>et</em> copié dans
+            le presse-papiers — s'il reste une case à compléter, elle est surlignée.</p>
+        </div>
+        <div class="col">
+          <h3>Prêt dès l'installation</h3>
+          <p>4 jeux, 140 prompts, plus un constructeur qui assemble rôle, tâche, public, ton,
+            format et garde-fous à partir de briques de texte.</p>
+        </div>
+      </div>
+
+      <dl class="gestures">
+        <div class="gesture"><dt><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>P</kbd></dt><dd>ouvre et ferme la roue</dd></div>
+        <div class="gesture"><dt>Clic</dt><dd>insère le prompt dans le champ de saisie</dd></div>
+        <div class="gesture"><dt><kbd>Maj</kbd> + clic</dt><dd>insère et envoie</dd></div>
+        <div class="gesture"><dt><kbd>Ctrl</kbd> + clic</dt><dd>copie seulement</dd></div>
+        <div class="gesture"><dt>Taper du texte</dt><dd>cherche dans les quatre jeux à la fois</dd></div>
+      </dl>
+    </section>
+
+    <section id="installation">
+      <p class="eyebrow">Installation</p>
+      <h2>Quatre étapes, deux minutes.</h2>
+      <p class="section-lead">Aucun programme à installer sur l'ordinateur : l'extension est un
+        dossier que Chrome charge.</p>
+
+      <div class="steps">
+        <div class="step">
+          <p>Téléchargez le fichier ZIP et décompressez-le.</p>
+          <p class="sub">Clic droit → <em>Extraire tout</em>. Gardez le dossier <code>prompt-wheel</code> à un endroit stable, il ne doit pas être supprimé ensuite.</p>
+        </div>
+        <div class="step">
+          <p>Ouvrez <code>chrome://extensions</code> dans la barre d'adresse.</p>
+          <p class="sub">Sur Edge : <code>edge://extensions</code></p>
+        </div>
+        <div class="step">
+          <p>Activez le <strong>Mode développeur</strong>, en haut à droite.</p>
+          <p class="sub">C'est l'interrupteur qui autorise les extensions chargées depuis un dossier.</p>
+        </div>
+        <div class="step">
+          <p>Cliquez sur <strong>Charger l'extension non empaquetée</strong> et choisissez le dossier.</p>
+          <p class="sub">La page de réglages s'ouvre. Rechargez les onglets déjà ouverts, et c'est prêt.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>Pourquoi le mode développeur ?</strong> Parce que l'extension n'est pas publiée sur
+        le Chrome Web Store. C'est la contrepartie d'un outil qu'on garde chez soi : aucun compte,
+        aucun serveur, aucune donnée envoyée nulle part. Vos prompts restent dans votre navigateur.
+      </div>
+
+      <div class="closing">
+        <a class="btn btn-primary" href="prompt-wheel.zip" download>Télécharger l'extension</a>
+        <a class="btn btn-ghost" href="https://github.com/knulp222/Test/tree/main/prompt-wheel-extension#readme">Lire le mode d'emploi</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Prompt Wheel — la roue des prompts.</span>
+    <span><a href="https://github.com/knulp222/Test/tree/main/prompt-wheel-extension">Code source sur GitHub</a></span>
+  </footer>
+
+</div>
+
+</body>
+</html>
