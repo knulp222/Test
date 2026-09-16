@@ -8,7 +8,7 @@ Aucun exécutable à installer : un dossier à charger dans Chrome.
 
 ## Installation (pour les stagiaires)
 
-Page de présentation et téléchargement : **https://knulp222.github.io/Test/prompt-wheel/**
+Page de présentation et téléchargement : **https://knulp222.github.io/Test/**
 
 1. Télécharger le `.zip` et le décompresser : il contient un dossier `prompt-wheel`.
 2. Ouvrir Chrome sur `chrome://extensions` (Edge : `edge://extensions`).
@@ -116,7 +116,7 @@ avant de distribuer le dossier — c'est ce qui est chargé à la première inst
 
 ```bash
 ./package.sh          # produit prompt-wheel-<version>.zip
-                      # et met à jour ../prompt-wheel/prompt-wheel.zip (le fichier servi par le site)
+                      # et met à jour ../prompt-wheel.zip (le fichier servi par le site)
 ```
 
 Le zip contient un dossier `prompt-wheel/` : c'est ce dossier-là qu'on désigne dans

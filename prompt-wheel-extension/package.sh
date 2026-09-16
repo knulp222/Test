@@ -20,8 +20,8 @@ rm -f "$out"
 echo "Créé : $out ($(du -h "$out" | cut -f1))"
 
 # Le site sert toujours le même nom de fichier, pour que le lien ne bouge pas.
-if [ -d ../prompt-wheel ]; then
-  cp "$out" ../prompt-wheel/prompt-wheel.zip
-  echo "Copié  : ../prompt-wheel/prompt-wheel.zip"
+if [ -f ../index.html ]; then
+  cp "$out" ../prompt-wheel.zip
+  echo "Copié  : ../prompt-wheel.zip (le fichier proposé par le site)"
   echo "Pensez à mettre à jour le numéro de version affiché sur la page."
 fi
