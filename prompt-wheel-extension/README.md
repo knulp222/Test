@@ -8,7 +8,7 @@ Aucun exécutable à installer : un dossier à charger dans Chrome.
 
 ## Installation (pour les stagiaires)
 
-Page de présentation et téléchargement : **https://knulp222.github.io/Test/**
+Page de présentation et téléchargement : **https://knulp222.github.io/roue-des-prompts/**
 
 1. Télécharger le `.zip` et le décompresser : il contient un dossier `prompt-wheel`.
 2. Ouvrir Chrome sur `chrome://extensions` (Edge : `edge://extensions`).
