@@ -118,11 +118,17 @@
   }
 
   /**
-   * Insère `text` dans `preferred` (ou le meilleur champ trouvé) et copie.
-   * Renvoie { inserted, copied }.
+   * Livre `text` selon le modificateur utilisé :
+   *   défaut       → insertion dans le champ (+ copie si alwaysCopy)
+   *   opts.send    → insertion puis touche Entrée
+   *   opts.copyOnly→ copie seulement, la page n'est pas touchée
+   * Renvoie { inserted, copied, sent, copyOnly }.
    */
-  async function deliver(text, preferred, options) {
-    const opts = options || {};
+  async function deliver(text, preferred, opts) {
+    const o = opts || {};
+    if (o.copyOnly) {
+      return { inserted: false, copied: await copy(text), sent: false, copyOnly: true };
+    }
     const target = findTarget(preferred);
     let inserted = false;
     if (target) {
@@ -135,9 +141,10 @@
         inserted = false;
       }
     }
-    const copied = (!inserted || opts.alwaysCopy) ? await copy(text) : false;
-    if (inserted && opts.autoSend && target) send(target);
-    return { inserted, copied };
+    const copied = (!inserted || o.alwaysCopy) ? await copy(text) : false;
+    let sent = false;
+    if (inserted && o.send && target) { send(target); sent = true; }
+    return { inserted, copied, sent, copyOnly: false };
   }
 
   root.PromptWheelInsert = { deliver, copy, findTarget, isEditable };

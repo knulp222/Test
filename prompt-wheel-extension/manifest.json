@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Prompt Wheel",
   "version": "1.0.0",
-  "description": "Roue de prompts : un menu radial pour retrouver et insérer vos prompts dans n'importe quel champ de saisie.",
+  "description": "La roue des prompts : un menu radial pour retrouver et insérer vos prompts dans n'importe quel champ de saisie.",
   "permissions": [
     "storage",
     "activeTab",
@@ -41,6 +41,11 @@
         "*://*/*.pdf"
       ],
       "js": [
+        "src/sets/set1.js",
+        "src/sets/set2.js",
+        "src/sets/set3.js",
+        "src/sets/set4.js",
+        "src/sets/builder.js",
         "src/defaults.js",
         "src/store.js",
         "src/insert.js",
@@ -54,9 +59,9 @@
   "commands": {
     "toggle-wheel": {
       "suggested_key": {
-        "default": "Alt+Shift+P"
+        "default": "Ctrl+Shift+P"
       },
-      "description": "Ouvrir / fermer la roue de prompts"
+      "description": "Ouvrir / fermer la roue des prompts"
     }
   },
   "web_accessible_resources": [

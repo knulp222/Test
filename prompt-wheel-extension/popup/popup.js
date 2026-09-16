@@ -1,61 +1,55 @@
-/* Popup : recherche rapide + insertion sans passer par la roue. */
+/* Popup : recherche rapide dans tous les jeux, insertion en un clic. */
 (function () {
   const Store = window.PromptWheelStore;
   const listEl = document.getElementById('list');
   const searchEl = document.getElementById('search');
-  const shortcutEl = document.getElementById('shortcut');
-
   let data = null;
-  let visible = [];
   let active = 0;
 
   function render() {
     const q = searchEl.value.trim().toLowerCase();
     const all = Store.allPrompts(data);
-    visible = q
-      ? all.filter((p) => (p.title + ' ' + p.text + ' ' + p.categoryName).toLowerCase().includes(q))
-      : all;
-    active = 0;
     listEl.innerHTML = '';
+    active = 0;
 
-    if (!visible.length) {
-      const empty = document.createElement('div');
-      empty.className = 'empty';
-      empty.textContent = q ? 'Aucun prompt ne correspond.' : 'Aucun prompt enregistré.';
-      listEl.appendChild(empty);
+    const matches = q
+      ? all.filter((p) => (p.title + ' ' + p.text + ' ' + p.categoryName + ' ' + p.setName).toLowerCase().includes(q))
+      : null;
+
+    if (matches) {
+      if (!matches.length) {
+        listEl.innerHTML = '<div class="empty">Aucun prompt ne correspond.</div>';
+        return;
+      }
+      group('Résultats · ' + matches.length, matches);
       return;
     }
 
-    if (!q && data.settings.showRecents) {
-      const rec = Store.recents(data, 5);
-      if (rec.length) {
-        addGroup('Récents', rec);
-        addGroup('Tous les prompts', all);
-        return;
-      }
-    }
-    addGroup(q ? 'Résultats' : 'Tous les prompts', visible);
+    const rec = Store.recents(data, 5);
+    if (rec.length) group('Récents', rec);
+    data.sets.forEach((s, si) => group(s.name, all.filter((p) => p.setIndex === si)));
   }
 
-  function addGroup(title, items) {
+  function group(title, items) {
+    if (!items.length) return;
     const h = document.createElement('div');
-    h.className = 'group-title';
+    h.className = 'group';
     h.textContent = title;
     listEl.appendChild(h);
-    items.forEach((p) => listEl.appendChild(buildItem(p)));
+    items.forEach((p) => listEl.appendChild(item(p)));
   }
 
-  function buildItem(p) {
-    const btn = document.createElement('button');
-    btn.className = 'item';
-    btn.type = 'button';
-    btn.title = p.text;
-    btn.innerHTML = '<span class="dot"></span><span class="title"></span><span class="cat"></span>';
-    btn.querySelector('.dot').style.background = p.color;
-    btn.querySelector('.title').textContent = p.title;
-    btn.querySelector('.cat').textContent = p.categoryName;
-    btn.addEventListener('click', () => insert(p));
-    return btn;
+  function item(p) {
+    const b = document.createElement('button');
+    b.className = 'item';
+    b.type = 'button';
+    b.title = p.text;
+    b.innerHTML = '<span class="ic"></span><span class="title"></span><span class="cat"></span>';
+    b.querySelector('.ic').textContent = p.icon;
+    b.querySelector('.title').textContent = p.title;
+    b.querySelector('.cat').textContent = p.short;
+    b.addEventListener('click', (e) => insert(p, { copyOnly: e.ctrlKey || e.metaKey, send: e.shiftKey }));
+    return b;
   }
 
   function highlight() {
@@ -64,18 +58,17 @@
     if (items[active]) items[active].scrollIntoView({ block: 'nearest' });
   }
 
-  async function insert(prompt) {
+  async function insert(prompt, mods) {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab || !tab.id) return;
     try {
       const res = await chrome.tabs.sendMessage(tab.id, {
-        type: 'insert-prompt',
-        promptId: prompt.id,
-        text: prompt.text
+        type: 'insert-prompt', id: prompt.id, text: prompt.text,
+        copyOnly: mods.copyOnly, send: mods.send
       });
       if (res && (res.inserted || res.copied)) window.close();
     } catch (e) {
-      // Pas de content script sur cet onglet : on se contente de copier.
+      // Onglet sans content script : on se contente de copier.
       await navigator.clipboard.writeText(prompt.text).catch(() => {});
       Store.recordUsage(prompt.id).catch(() => {});
       window.close();
@@ -98,23 +91,14 @@
   document.getElementById('open-wheel').addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab || !tab.id) return;
-    try {
-      await chrome.tabs.sendMessage(tab.id, { type: 'toggle-wheel' });
-      window.close();
-    } catch (e) {
-      alert("La roue n'est pas disponible sur cet onglet. Recharge la page puis réessaie.");
-    }
+    try { await chrome.tabs.sendMessage(tab.id, { type: 'toggle-wheel' }); window.close(); }
+    catch (e) { alert("La roue n'est pas disponible sur cet onglet. Recharge la page puis réessaie."); }
   });
 
   chrome.commands.getAll().then((cmds) => {
-    const cmd = cmds.find((c) => c.name === 'toggle-wheel');
-    shortcutEl.textContent = cmd && cmd.shortcut ? 'Raccourci : ' + cmd.shortcut : 'Aucun raccourci défini';
+    const c = cmds.find((x) => x.name === 'toggle-wheel');
+    document.getElementById('shortcut').textContent = c && c.shortcut ? 'Raccourci : ' + c.shortcut : 'Ctrl+Alt+P dans la page';
   }).catch(() => {});
 
-  Store.get().then((d) => {
-    data = d;
-    render();
-    highlight();
-    searchEl.focus();
-  });
+  Store.get().then((d) => { data = d; render(); highlight(); searchEl.focus(); });
 })();

@@ -2,27 +2,25 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Prompt Wheel</title>
+  <title>La roue des prompts</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <header class="head">
-    <div class="brand">
-      <img src="../icons/icon32.png" alt="" width="20" height="20">
-      <strong>Prompt Wheel</strong>
-    </div>
-    <button id="open-wheel" class="btn btn-sm" title="Ouvrir la roue dans la page">Ouvrir la roue</button>
+    <div class="brand"><img src="../icons/icon32.png" alt="" width="20" height="20"><strong>La roue des prompts</strong></div>
+    <button id="open-wheel" class="btn btn-sm">Ouvrir la roue</button>
   </header>
-
-  <input id="search" type="search" placeholder="Rechercher…" autocomplete="off" spellcheck="false">
-
-  <div id="list" class="list" role="listbox" aria-label="Prompts"></div>
-
+  <input id="search" type="search" placeholder="Rechercher dans les 4 jeux…" autocomplete="off" spellcheck="false">
+  <div id="list" class="list"></div>
   <footer class="foot">
     <span id="shortcut" class="muted"></span>
-    <a id="open-options" href="#">Gérer mes prompts</a>
+    <a id="open-options" href="#">Gérer les prompts</a>
   </footer>
-
+  <script src="../src/sets/set1.js"></script>
+  <script src="../src/sets/set2.js"></script>
+  <script src="../src/sets/set3.js"></script>
+  <script src="../src/sets/set4.js"></script>
+  <script src="../src/sets/builder.js"></script>
   <script src="../src/defaults.js"></script>
   <script src="../src/store.js"></script>
   <script src="popup.js"></script>
