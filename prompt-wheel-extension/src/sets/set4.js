@@ -1,6 +1,6 @@
 /* Jeu 4 — Agents & assistants : instructions complètes à coller dans un Gem,
    un GPT personnalisé ou un agent Copilot. Gabarit : rôle → mission → règles → format. */
-window.PW_SET_4 = {
+globalThis.PW_SET_4 = {
   name: "Agents & assistants",
   categories: [
     {

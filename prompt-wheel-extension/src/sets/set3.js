@@ -1,6 +1,6 @@
 /* Jeu 3 — Travail administratif : public qui a de la matière, donc certains
    prompts attendent un [coller …]. */
-window.PW_SET_3 = {
+globalThis.PW_SET_3 = {
   name: "Travail administratif",
   categories: [
     {

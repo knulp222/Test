@@ -245,4 +245,4 @@
     backup, getBackup, restoreBackup,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); }
   };
-})(typeof window !== 'undefined' ? window : self);
+})(globalThis);

@@ -22,4 +22,4 @@
       startSet: 0
     }
   };
-})(typeof window !== 'undefined' ? window : self);
+})(globalThis);

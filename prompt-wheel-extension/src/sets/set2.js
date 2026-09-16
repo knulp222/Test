@@ -1,6 +1,6 @@
 /* Jeu 2 — Démos concrètes : prompts autonomes, situation incluse, rien à préparer.
    Seules exceptions : Documents (pièce jointe) et un [ville] dans Recherche. */
-window.PW_SET_2 = {
+globalThis.PW_SET_2 = {
   name: "Démos concrètes",
   categories: [
     {

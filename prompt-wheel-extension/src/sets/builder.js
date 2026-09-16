@@ -1,6 +1,6 @@
 /* Constructeur de prompt : les ingrédients, chacun avec ses briques de texte.
    Le secteur « Construire » est présent dans chaque jeu et pointe ici. */
-window.PW_BUILDER = {
+globalThis.PW_BUILDER = {
   name: "Constructeur de prompt",
   hint: "Choisis une brique par ligne. Le prompt se monte en dessous.",
   ingredients: [

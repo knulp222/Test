@@ -1,5 +1,5 @@
 /* Jeu 1 — Mécanique & biais : comprendre comment l'outil fonctionne et où il dérape. */
-window.PW_SET_1 = {
+globalThis.PW_SET_1 = {
   name: "Mécanique & biais",
   categories: [
     {
